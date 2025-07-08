@@ -21,7 +21,7 @@ const AddComment = ({ setSidebarShowStatus, slug, getBlogComments, activeUser, c
 
         e.preventDefault();
         try {
-            await axios.post(`/comment/${slug}/addComment`, { content, star }, {
+            await axios.post(`https://vichaar-blog.onrender.com/comment/${slug}/addComment`, { content, star }, {
                 headers: {
                     "Content-Type": "application/json",
                     authorization: `Bearer ${localStorage.getItem("authToken")}`,

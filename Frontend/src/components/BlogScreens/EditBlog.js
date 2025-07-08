@@ -27,7 +27,7 @@ const EditBlog = () => {
         const getBlogInfo = async () => {
             setLoading(true)
             try {
-                const { data } = await axios.get(`/blog/editBlog/${slug}`, config)
+                const { data } = await axios.get(`https://vichaar-blog.onrender.com/blog/editBlog/${slug}`, config)
                 setBlog(data.data)
                 setTitle(data.data.title)
                 setContent(data.data.content)
@@ -51,7 +51,7 @@ const EditBlog = () => {
         formdata.append("previousImage", previousImage)
 
         try {
-            const { data } = await axios.put(`/blog/${slug}/edit`, formdata, config)
+            const { data } = await axios.put(`https://vichaar-blog.onrender.com/blog/${slug}/edit`, formdata, config)
 
             setSuccess('Edit Blog successfully ')
 
