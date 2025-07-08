@@ -1,149 +1,111 @@
-import React from 'react'
-import '../../Css/Pagination.css'
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
-import { TiMinus } from 'react-icons/ti'
+import React from 'react';
+import '../../Css/Pagination.css';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { TiMinus } from 'react-icons/ti';
 
 const Pagination = ({ page, pages, changePage }) => {
-    function numberRange(start, end) {
-        return new Array(end - start).fill().map((d, i) => i + start);
-    }
+  // Guard clause: Don't render anything if pages is invalid
+  if (!pages || pages <= 1 || !Number.isInteger(pages)) return null;
 
-    let middlePagination;
+  function numberRange(start, end) {
+    const length = end - start;
+    if (length <= 0) return [];
+    return Array.from({ length }, (_, i) => i + start);
+  }
 
-    if (pages <= 5) {
-        middlePagination = [...Array(pages)].map((__, index) => (
+  let middlePagination;
 
-            <button
-                key={index + 1}
-                onClick={() => changePage(index + 1)}
-                disabled={page === index + 1}
-            >
-                {index + 1}
+  if (pages <= 5) {
+    middlePagination = [...Array(pages)].map((_, index) => (
+      <button
+        key={index + 1}
+        onClick={() => changePage(index + 1)}
+        disabled={page === index + 1}
+      >
+        {index + 1}
+      </button>
+    ));
+  } else {
+    const startValue = Math.floor((page - 1) / 5) * 5;
 
-            </button>
-
-        ))
-    }
-    else {
-        const startValue = Math.floor((page - 1) / 5) * 5
-
+    if (page > 5) {
+      if (pages - page >= 5) {
         middlePagination = (
-            <>
-                {numberRange(startValue, pages).map((__, index) => (
-                    <button
-                        key={startValue + index + 1}
-                        onClick={() => changePage(startValue + index + 1)}
-                        disabled={page === startValue + index + 1}
-                    >
-                        {startValue + index + 1}
-                    </button>
-
-                ))}
-                <button>...</button>
-                <button
-
-                    onClick={() => changePage(pages)} disabled={page === pages}>
-                    {pages}
-                </button>
-            </>
+          <>
+            <button onClick={() => changePage(1)}>1</button>
+            <button disabled>...</button>
+            <button onClick={() => changePage(startValue)}>{startValue}</button>
+            {numberRange(startValue, startValue + 5).map((num) => (
+              <button
+                key={num}
+                onClick={() => changePage(num)}
+                disabled={page === num}
+              >
+                {num}
+              </button>
+            ))}
+            <button disabled>...</button>
+            <button onClick={() => changePage(pages)}>{pages}</button>
+          </>
         );
-
-        if (page > 5) {
-            if (pages - page >= 5) {
-                middlePagination = (
-                    <>
-                        <button onClick={() => changePage(1)}>1</button>
-                        <button>...</button>
-                        <button onClick={() => changePage(startValue)}>{startValue}</button>
-
-                        {numberRange(startValue, pages).map((__, index) => (
-                            <button
-                                key={startValue + index + 1}
-                                onClick={() => changePage(startValue + index + 1)}
-
-                                disabled={page === startValue + index + 1}
-
-                            >
-                                {startValue + index + 1}
-                            </button>
-
-                        ))}
-                        <button>...</button>
-                        <button
-                            onClick={() => changePage(pages)}>
-                            {pages}
-                        </button>
-                    </>
-                )
-            }
-
-            else {
-                let amountLeft = pages - page + 5
-                middlePagination = (
-                    <>
-                        <button onClick={() => changePage(1)}>1</button>
-                        <button>...</button>
-                        <button onClick={() => changePage(startValue)}>{startValue}</button>
-                        {numberRange(amountLeft, pages).map((__, index) => (
-                            <button
-                                key={startValue + index + 1}
-                                onClick={() => changePage(startValue + index + 1)}
-
-                                disabled={page === startValue + index + 1}
-
-                                style={pages < startValue + index + 1 ? { display: "none" } : null}
-                            >
-                                {startValue + index + 1}
-                            </button>
-
-                        ))}
-
-                    </>
-                )
-            }
-        }
-
-
+      } else {
+        let rangeStart = pages - 5 <= 1 ? 1 : pages - 5;
+        middlePagination = (
+          <>
+            <button onClick={() => changePage(1)}>1</button>
+            <button disabled>...</button>
+            {numberRange(rangeStart, pages + 1).map((num) => (
+              <button
+                key={num}
+                onClick={() => changePage(num)}
+                disabled={page === num}
+              >
+                {num}
+              </button>
+            ))}
+          </>
+        );
+      }
+    } else {
+      middlePagination = (
+        <>
+          {numberRange(1, 6).map((num) => (
+            <button
+              key={num}
+              onClick={() => changePage(num)}
+              disabled={page === num}
+            >
+              {num}
+            </button>
+          ))}
+          <button disabled>...</button>
+          <button onClick={() => changePage(pages)}>{pages}</button>
+        </>
+      );
     }
+  }
 
+  return (
+    <div className="pagination">
+      <button
+        className="pagination__prev"
+        onClick={() => changePage(page - 1)}
+        disabled={page === 1}
+      >
+        {page === 1 ? <TiMinus color="gray" /> : <FaChevronLeft />}
+      </button>
 
+      {middlePagination}
 
-    return (
+      <button
+        className="pagination__next"
+        onClick={() => changePage(page + 1)}
+        disabled={page === pages}
+      >
+        {page === pages ? <TiMinus color="gray" /> : <FaChevronRight />}
+      </button>
+    </div>
+  );
+};
 
-        pages > 1 && (
-
-
-            <div className="pagination">
-
-                <button className='pagination__prev'
-                    onClick={() => changePage(page - 1)}
-                    disabled={page === 1}
-                >
-                    {page === 1 ? <TiMinus color='gray' /> :
-                        <FaChevronLeft />
-
-                    }
-
-                </button>
-
-                {middlePagination}
-
-
-                <button className='pagination__next'
-                    onClick={() => changePage(page + 1)}
-                    disabled={page === pages}
-                >
-                    {page === pages ? <TiMinus color='gray' /> :
-                        <FaChevronRight />
-
-                    }
-                </button>
-
-            </div>
-
-        )
-
-    );
-}
-
-export default Pagination
+export default Pagination;
