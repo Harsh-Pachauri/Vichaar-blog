@@ -1,104 +1,87 @@
 import axios from "axios";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+
 import SkeletonBlog from "../Skeletons/SkeletonBlog";
 import CardBlog from "../BlogScreens/CardBlog";
 import NoBlogs from "../BlogScreens/NoBlogs";
 import Pagination from "./Pagination";
-import "../../Css/Home.css"
 
-import { useNavigate } from "react-router-dom"
+import "../../Css/Home.css";
+
 const Home = () => {
-  const search = useLocation().search
-  const searchKey = new URLSearchParams(search).get('search')
-  const [blogs, setBlogs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const navigate = useNavigate()
+  const search = useLocation().search;
+  const searchKey = new URLSearchParams(search).get("search");
+
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
+  const navigate = useNavigate();
 
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setPage(1);
+  }, [searchKey]);
 
   useEffect(() => {
     const getBlogs = async () => {
-
-      setLoading(true)
+      setLoading(true);
       try {
+        const { data } = await axios.get(
+          `/blog/getAllBlogs?search=${searchKey || ""}&page=${page}`
+        );
 
-        const { data } = await axios.get(`/blog/getAllBlogs?search=${searchKey || ""}&page=${page}`)
+        setBlogs(data.data);
+        setPages(data.pages);
+        setLoading(false);
 
-        if (searchKey) {
-          navigate({
-            pathname: '/',
-            search: `?search=${searchKey}${page > 1 ? `&page=${page}` : ""}`,
-          });
-        }
-        else {
-          navigate({
-            pathname: '/',
-            search: `${page > 1 ? `page=${page}` : ""}`,
-          });
-
-
-        }
-        setBlogs(data.data)
-        setPages(data.pages)
-
-        setLoading(false)
+        // Update URL
+        navigate({
+          pathname: "/",
+          search: `${searchKey ? `?search=${searchKey}` : ""}${page > 1 ? `&page=${page}` : ""}`,
+        });
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+        setLoading(false);
       }
-      catch (error) {
-        setLoading(true)
-      }
-    }
-    getBlogs()
-  }, [setLoading, search, page, navigate])
+    };
 
-
-  useEffect(() => {
-    setPage(1)
-  }, [searchKey])
-
+    getBlogs();
+  }, [searchKey, page, navigate]);
 
   return (
     <div className="Inclusive-home-page">
-      {loading ?
-
+      {loading ? (
         <div className="skeleton_emp">
-          {
-            [...Array(6)].map(() => {
-              return (
-                // theme dark :> default : light
-                <SkeletonBlog key={uuidv4()} />
-              )
-            })}
+          {[...Array(6)].map(() => (
+            <SkeletonBlog key={uuidv4()} />
+          ))}
         </div>
-
-        :
+      ) : (
         <div>
           <div className="blog-card-wrapper">
-            {blogs.length !== 0 ?
-              blogs.map((blog) => {
-                return (
-                  <CardBlog key={uuidv4()} blog={blog} />
-                )
-              }) : <NoBlogs />
-            }
+            {Array.isArray(blogs) && blogs.length > 0 ? (
+              blogs.map((blog) => (
+                <CardBlog key={uuidv4()} blog={blog} />
+              ))
+            ) : (
+              <NoBlogs />
+            )}
+
+            {/* Background SVGs */}
             <img className="bg-planet-svg" src="planet.svg" alt="planet" />
             <img className="bg-planet2-svg" src="planet2.svg" alt="planet" />
             <img className="bg-planet3-svg" src="planet3.svg" alt="planet" />
-
           </div>
 
           <Pagination page={page} pages={pages} changePage={setPage} />
-
         </div>
-
-      }
+      )}
       <br />
     </div>
-
-  )
-
+  );
 };
 
 export default Home;
