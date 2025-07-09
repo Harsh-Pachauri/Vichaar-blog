@@ -1,147 +1,142 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { FaUserAlt } from 'react-icons/fa'
-import { AiOutlineUpload } from 'react-icons/ai'
-import Loader from "../GeneralScreens/Loader";
+import { FaUserAlt } from 'react-icons/fa';
+import { AiOutlineUpload } from 'react-icons/ai';
+import Loader from '../GeneralScreens/Loader';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../Context/AuthContext';
-import '../../Css/EditProfile.css'
+import '../../Css/EditProfile.css';
 
 const EditProfile = () => {
-    const { activeUser, config } = useContext(AuthContext)
-    const [loading, setLoading] = useState(true)
-    const navigate = useNavigate();
-    const [username, setUsername] = useState('')
-    const [email, setEmail] = useState('')
-    const [photo, setPhoto] = useState('')
-    const [previousPhoto, setPreviousPhoto] = useState('')
-    const [error, setError] = useState('')
-    const [success, setSuccess] = useState('')
+  const { activeUser, updateUserProfile, config } = useContext(AuthContext);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [photoFile, setPhotoFile] = useState(null);
+  const [previousPhoto, setPreviousPhoto] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const formdata = new FormData()
-        formdata.append("username", username)
-        formdata.append("email", email)
-        formdata.append("photo", photo)
-
-        try {
-            const { data } = await axios.post("https://vichaar-blog.onrender.com/user/editProfile", formdata, config)
-
-            setSuccess('Edit Profile successfully ')
-            setTimeout(() => {
-                navigate('/profile')
-            }, 1500)
-        }
-        catch (error) {
-            setTimeout(() => {
-                setError('')
-            }, 7000)
-            setError(error.response.data.error)
-        }
+  useEffect(() => {
+    if (activeUser) {
+      setUsername(activeUser.username || '');
+      setEmail(activeUser.email || '');
+      setPreviousPhoto(activeUser.photo || '');
+      console.log(previousPhoto)
+      setLoading(false);
     }
+  }, [activeUser]);
 
-    useEffect(() => {
-        setUsername(activeUser.username)
-        setEmail(activeUser.email)
-        setPreviousPhoto(activeUser.photo)
-        setPhoto(activeUser.photo)
-        setTimeout(() => {
-            setLoading(false)
-        }, 1050)
-    }, [navigate, activeUser])
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    return (
-        <>
-            {
-                loading ? <Loader /> :
-                    <div className="Inclusive-editprofile-page">
+  const formData = new FormData();
+  formData.append('username', username);
+  formData.append('email', email);
+  if (photoFile) formData.append('photo', photoFile);
 
-                        <form onSubmit={handleSubmit}>
-                            {error && <div className="error_msg">{error}</div>}
+  try {
+    setLoading(true);
+    setError('');
+    setSuccess('');
 
-                            {success && <div className="success_msg">{success}  </div>}
+    const { data } = await axios.patch(
+      'http://localhost:5000/user/editProfile',
+      formData,
+      config
+    );
 
-                            <div className="input-wrapper">
-                                <input type="text"
-                                    id="username" placeholder="Username  " name='username'
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                />
-                                <label htmlFor="username">Username</label>
+    // ✅ Use server-provided message if available
+    setSuccess(data.message || 'Profile updated successfully!');
+    // updateUserProfile(data.updatedUser);
 
-                            </div>
-
-                            <div className="input-wrapper">
-
-                                <input type="email"
-                                    id="email" placeholder="Email  " name='email'
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                                <label htmlFor="email">E-mail</label>
-
-                            </div>
-
-                            <div className="profile-ımg-upld-wrapper">
-
-                                <div class="ProfilePhotoField">
-                                    <FaUserAlt />
-                                    <div class="txt">
-
-                                        {photo === previousPhoto ?
-                                            <div>
-                                                <AiOutlineUpload />
-                                                <span>
-                                                    Change Profile Photo
-
-                                                </span>
-                                            </div>
-                                            :
-                                            photo.name
-                                        }
-                                    </div>
-                                    <input
-                                        name="photo"
-                                        type="file"
-
-                                        onChange={(e) => {
-                                            setPhoto(e.target.files[0])
-                                        }}
-                                    />
+    setTimeout(() => {
+      navigate('/profile');
+    }, 1500);
+  } catch (err) {
+    setError(err.response?.data?.error || 'Something went wrong');
+  } finally {
+    setLoading(false);
+  }
+};
 
 
-                                </div>
+  if (loading) return <Loader />;
 
+  return (
+    <div className="Inclusive-editprofile-page">
+      <form onSubmit={handleSubmit}>
+        {error && <div className="error_msg">{error}</div>}
+        {success && <div className="success_msg">{success}</div>}
 
-                                <div class="currentImage">
-                                    <div class="absolute">
-                                        Currently Image
-                                    </div>
-                                    <img src={`http://localhost:5000/userPhotos/${previousPhoto}`} alt="userPhoto" />
-                                </div>
+        <div className="input-wrapper">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <label htmlFor="username">Username</label>
+        </div>
 
-                            </div>
+        <div className="input-wrapper">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <label htmlFor="email">Email</label>
+        </div>
 
-                            <button type='submit' className='editprofile-btn'
-                            >Edit Profile </button>
+        <div className="profile-img-upld-wrapper">
+          <div className="ProfilePhotoField">
+            <FaUserAlt />
+            <div className="txt">
+              {photoFile ? (
+                photoFile.name
+              ) : (
+                <div>
+                  <AiOutlineUpload />
+                  <span>Change Profile Photo</span>
+                </div>
+              )}
+            </div>
+            <input
+              name="photo"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                setPhotoFile(file);
+              }}
+            />
+          </div>
 
+          {previousPhoto && (
+            <div className="currentImage">
+              <div className="absolute">Current Image</div>
+              <img
+                src={`${previousPhoto}`}
+                alt="Current Profile"
+                width="100"
+              />
+            </div>
+          )}
+        </div>
 
-
-                        </form>
-
-
-
-
-
-
-
-                    </div>
-            }
-        </>
-
-    )
-}
+        <button type="submit" className="editprofile-btn">
+          Edit Profile
+        </button>
+      </form>
+    </div>
+  );
+};
 
 export default EditProfile;

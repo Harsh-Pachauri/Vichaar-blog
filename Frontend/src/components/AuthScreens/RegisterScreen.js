@@ -24,7 +24,7 @@ const RegisterScreen = () => {
 
     try {
       const { data } = await axios.post(
-        "https://vichaar-blog.onrender.com/auth/register",
+        "/auth/register",
         {
           username,
           email,

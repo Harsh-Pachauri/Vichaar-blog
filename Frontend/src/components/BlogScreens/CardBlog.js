@@ -26,7 +26,7 @@ const Blog = ({ blog }) => {
         <div className="blog-card">
             <Link to={`/blog/${blog.slug}`} className="blog-link">
 
-                <img className=" blog-image" src={`/blogImages/${blog.image}`} alt={blog.title} />
+                <img className=" blog-image" src={blog.image} alt={blog.title} />
                 <div className="blog-content-wrapper">
 
                     <h5 className="blog-title">

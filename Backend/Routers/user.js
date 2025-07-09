@@ -1,23 +1,32 @@
-const express = require("express")
+const express = require("express");
+const router = express.Router();
 
-const imageUpload = require("../Helpers/Libraries/imageUpload");
-
-const {profile,editProfile,changePassword,addBlogToReadList,readListPage} = require("../Controllers/user");
 const { getAccessToRoute } = require("../Middlewares/Authorization/auth");
+// const { uploadUserPhoto } = require("../Helpers/Libraries/imageUpload"); // from your updated multer-cloudinary helper
+const { upload } = require('../Middlewares/multer.middleware');
 
+const {
+  profile,
+  editProfile,
+  changePassword,
+  addBlogToReadList,
+  readListPage,
+} = require("../Controllers/user");
 
-const router = express.Router() ;
+router.get("/profile", getAccessToRoute, profile);
 
-router.get("/profile",getAccessToRoute ,profile)
+// Use multer middleware to handle single photo upload from field 'photo'
+router.patch(
+  "/editProfile",
+  getAccessToRoute,
+  upload.single("photo"),
+  editProfile
+);
 
-router.post("/editProfile",[getAccessToRoute ,imageUpload.single("photo")],editProfile)
+router.put("/changePassword", getAccessToRoute, changePassword);
 
-router.put("/changePassword",getAccessToRoute,changePassword)
+router.post("/:slug/addBlogToReadList", getAccessToRoute, addBlogToReadList);
 
-router.post("/:slug/addBlogToReadList",getAccessToRoute ,addBlogToReadList)
+router.get("/readList", getAccessToRoute, readListPage);
 
-router.get("/readList",getAccessToRoute ,readListPage)
-
-
-
-module.exports = router
+module.exports = router;

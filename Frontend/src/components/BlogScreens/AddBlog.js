@@ -36,7 +36,7 @@ const AddBlog = () => {
         formdata.append("content", content)
 
         try {
-            const { data } = await axios.post("https://vichaar-blog.onrender.com/blog/addblog", formdata, config)
+            const { data } = await axios.post("/blog/addblog", formdata, config)
             setSuccess('Add blog successfully ')
 
             clearInputs()

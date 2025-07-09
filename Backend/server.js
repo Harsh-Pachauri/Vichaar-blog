@@ -8,7 +8,7 @@ const connectDatabase = require("./Helpers/database/connectDatabase")
 const customErrorHandler = require("./Middlewares/Errors/customErrorHandler")
 
 dotenv.config({
-    path:  './Config/config.env'
+    path:  './config.env'
 })
 
 connectDatabase()
@@ -22,7 +22,7 @@ app.use("/",IndexRoute)
 
 app.use(customErrorHandler)
 
-const PORT = process.env.PORT || 5000 ;
+const PORT = process.env.PORT ;
 
 app.use(express.static(path.join(__dirname , "public") ))
 

@@ -1,196 +1,181 @@
-const asyncErrorWrapper = require("express-async-handler")
+const asyncErrorWrapper = require("express-async-handler");
 const Blog = require("../Models/blog");
-const deleteImageFile = require("../Helpers/Libraries/deleteImageFile");
-const {searchHelper, paginateHelper} =require("../Helpers/query/queryHelpers")
-
-const addBlog = asyncErrorWrapper(async  (req,res,next)=> {
-
-    const {title,content} = req.body 
-
-    var wordCount = content.trim().split(/\s+/).length ; 
-   
-    let readtime = Math.floor(wordCount /200)   ;
+const { searchHelper, paginateHelper } = require("../Helpers/query/queryHelpers");
+const { uploadOnCloudinary, deleteFromCloudinary } = require('../Helpers/Libraries/cloudinary');
 
 
-    try {
-        const newBlog = await Blog.create({
-            title,
-            content,
-            author :req.user._id ,
-            image : req.savedBlogImage,
-            readtime
-        })
+const addBlog = asyncErrorWrapper(async (req, res, next) => {
+  const { title, content } = req.body;
 
-        return res.status(200).json({
-            success :true ,
-            message : "add blog successfully ",
-            data: newBlog
-        })
+  const wordCount = content.trim().split(/\s+/).length;
+  const readtime = Math.ceil(wordCount / 200);
+
+  let imageUrl = "";
+
+  // ✅ Upload to Cloudinary if a file was uploaded
+  if (req.file) {
+    const localPath = req.file.path;
+
+    const uploadResult = await uploadOnCloudinary(localPath);
+    if (!uploadResult || !uploadResult.url) {
+      return next(new CustomError("Image upload failed", 400));
     }
 
-    catch(error) {
+    imageUrl = uploadResult.url;
+  }
 
-        deleteImageFile(req)
+  // ✅ Save blog to DB
+  const newBlog = await Blog.create({
+    title,
+    content,
+    author: req.user._id,
+    image: imageUrl,
+    readtime,
+  });
 
-        return next(error)
-        
-    }
-  
-})
-
-const getAllBlogs = asyncErrorWrapper( async (req,res,next) =>{
-
-    let query = Blog.find();
-
-    query =searchHelper("title",query,req)
-
-    const paginationResult =await paginateHelper(Blog , query ,req)
-
-    query = paginationResult.query  ;
-
-    query = query.sort("-likeCount -commentCount -createdAt")
-
-    const blogs = await query
-    
-    return res.status(200).json(
-        {
-            success:true,
-            count : blogs.length,
-            data : blogs ,
-            page : paginationResult.page ,
-            pages : paginationResult.pages
-        })
-
-})
-
-const detailBlog =asyncErrorWrapper(async(req,res,next)=>{
-
-    const {slug}=req.params ;
-    const {activeUser} =req.body 
-
-    const blog = await Blog.findOne({
-        slug: slug 
-    }).populate("author likes")
-
-    const blogLikeUserIds = blog.likes.map(json => json.id)
-    const likeStatus = blogLikeUserIds.includes(activeUser._id)
+  return res.status(200).json({
+    success: true,
+    message: "Blog added successfully",
+    data: newBlog,
+  });
+});
 
 
-    return res.status(200).
-        json({
-            success:true,
-            data : blog,
-            likeStatus:likeStatus
-        })
+const getAllBlogs = asyncErrorWrapper(async (req, res, next) => {
+  let query = Blog.find();
+  query = searchHelper("title", query, req);
 
-})
+  const paginationResult = await paginateHelper(Blog, query, req);
+  query = paginationResult.query.sort("-likeCount -commentCount -createdAt");
 
-const likeBlog =asyncErrorWrapper(async(req,res,next)=>{
+  const blogs = await query;
 
-    const {activeUser} =req.body 
-    const {slug} = req.params ;
+  return res.status(200).json({
+    success: true,
+    count: blogs.length,
+    data: blogs,
+    page: paginationResult.page,
+    pages: paginationResult.pages,
+  });
+});
 
-    const blog = await Blog.findOne({
-        slug: slug 
-    }).populate("author likes")
-   
-    const blogLikeUserIds = blog.likes.map(json => json._id.toString())
-   
-    if (! blogLikeUserIds.includes(activeUser._id)){
+const detailBlog = asyncErrorWrapper(async (req, res, next) => {
+  const { slug } = req.params;
+  const { activeUser } = req.body;
 
-        blog.likes.push(activeUser)
-        blog.likeCount = blog.likes.length
-        await blog.save() ; 
-    }
-    else {
+  const blog = await Blog.findOne({ slug }).populate("author likes");
+  const likeStatus = blog.likes.some((user) => user.id === activeUser._id);
 
-        const index = blogLikeUserIds.indexOf(activeUser._id)
-        blog.likes.splice(index,1)
-        blog.likeCount = blog.likes.length
+  return res.status(200).json({
+    success: true,
+    data: blog,
+    likeStatus,
+  });
+});
 
-        await blog.save() ; 
-    }
- 
-    return res.status(200).
-    json({
-        success:true,
-        data : blog
-    })
+const likeBlog = asyncErrorWrapper(async (req, res, next) => {
+  const { activeUser } = req.body;
+  const { slug } = req.params;
 
-})
+  const blog = await Blog.findOne({ slug }).populate("author likes");
+  const userIds = blog.likes.map((u) => u._id.toString());
 
-const editBlogPage  =asyncErrorWrapper(async(req,res,next)=>{
-    const {slug } = req.params ; 
-   
-    const blog = await Blog.findOne({
-        slug: slug 
-    }).populate("author likes")
+  if (!userIds.includes(activeUser._id)) {
+    blog.likes.push(activeUser);
+  } else {
+    const index = userIds.indexOf(activeUser._id);
+    blog.likes.splice(index, 1);
+  }
 
-    return res.status(200).
-        json({
-            success:true,
-            data : blog
-    })
+  blog.likeCount = blog.likes.length;
+  await blog.save();
 
-})
+  return res.status(200).json({
+    success: true,
+    data: blog,
+  });
+});
 
+const editBlogPage = asyncErrorWrapper(async (req, res, next) => {
+  const { slug } = req.params;
 
-const editBlog  =asyncErrorWrapper(async(req,res,next)=>{
-    const {slug } = req.params ; 
-    const {title ,content ,image ,previousImage } = req.body;
+  const blog = await Blog.findOne({ slug }).populate("author likes");
 
-    const blog = await Blog.findOne({slug : slug })
+  return res.status(200).json({
+    success: true,
+    data: blog,
+  });
+});
 
-    blog.title = title ;
-    blog.content = content ;
-    blog.image =   req.savedBlogImage ;
+const editBlog = asyncErrorWrapper(async (req, res, next) => {
+  const { slug } = req.params;
+  const { title, content, image: prevImageUrl } = req.body;
 
-    if( !req.savedBlogImage) {
-        // if the image is not sent
-        blog.image = image
-    }
-    else {
-        // if the image sent
-        // old image locatıon delete
-       deleteImageFile(req,previousImage)
+  const blog = await Blog.findOne({ slug });
+  if (!blog) {
+    return next(new CustomError("Blog not found", 404));
+  }
 
+  blog.title = title;
+  blog.content = content;
+
+  // ✅ If new image uploaded
+  if (req.file?.path) {
+    const localFilePath = req.file.path;
+
+    // ✅ Delete old image from Cloudinary if exists
+    if (prevImageUrl) {
+      const publicId = prevImageUrl.split("/").pop().split(".")[0];
+      await deleteFromCloudinary(publicId);
     }
 
-    await blog.save()  ;
+    const uploadResult = await uploadOnCloudinary(localFilePath);
+    if (!uploadResult || !uploadResult.url) {
+      return next(new CustomError("Image upload failed", 400));
+    }
 
-    return res.status(200).
-        json({
-            success:true,
-            data :blog
-    })
+    blog.image = uploadResult.url;
+  }
 
-})
+  await blog.save();
 
-const deleteBlog  =asyncErrorWrapper(async(req,res,next)=>{
-
-    const {slug} = req.params  ;
-
-    const blog = await Blog.findOne({slug : slug })
-
-    deleteImageFile(req,blog.image) ; 
-
-    await blog.remove()
-
-    return res.status(200).
-        json({
-            success:true,
-            message : "Blog delete succesfully "
-    })
-
-})
+  return res.status(200).json({
+    success: true,
+    message: "Blog updated successfully",
+    data: blog,
+  });
+});
 
 
-module.exports ={
-    addBlog,
-    getAllBlogs,
-    detailBlog,
-    likeBlog,
-    editBlogPage,
-    editBlog ,
-    deleteBlog
-}
+const deleteBlog = asyncErrorWrapper(async (req, res, next) => {
+  const { slug } = req.params;
+
+  const blog = await Blog.findOne({ slug });
+  if (!blog) {
+    return next(new CustomError("Blog not found", 404));
+  }
+
+  // ✅ If blog has an image, delete from Cloudinary
+  if (blog.image) {
+    const publicId = blog.image.split("/").pop().split(".")[0];
+    await deleteFromCloudinary(publicId);
+  }
+
+  await blog.remove();
+
+  return res.status(200).json({
+    success: true,
+    message: "Blog deleted successfully",
+  });
+});
+
+
+module.exports = {
+  addBlog,
+  getAllBlogs,
+  detailBlog,
+  likeBlog,
+  editBlogPage,
+  editBlog,
+  deleteBlog,
+};

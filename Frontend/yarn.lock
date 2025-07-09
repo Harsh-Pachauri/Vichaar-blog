@@ -1923,7 +1923,7 @@
   dependencies:
     "@types/connect" "*"
     "@types/node" "*"
-
+    
 "@types/bonjour@^3.5.9":
   version "3.5.10"
   resolved "https://registry.npmjs.org/@types/bonjour/-/bonjour-3.5.10.tgz"

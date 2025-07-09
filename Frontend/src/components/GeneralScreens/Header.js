@@ -15,9 +15,12 @@ const Header = () => {
     const { activeUser } = useContext(AuthContext)
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
-
+  const [photo, setPhoto] = useState('');
+    
     useEffect(() => {
-
+        if (activeUser) {
+            setPhoto(activeUser.photo || '');
+        }
         setAuth(bool)
         setTimeout(() => {
             setLoading(false)
@@ -65,7 +68,7 @@ const Header = () => {
 
                                     :
 
-                                    <img src={`/userPhotos/${activeUser.photo}`} alt={activeUser.username} />
+                                    <img src={ activeUser.photo} alt={activeUser.username} />
 
                                 }
 

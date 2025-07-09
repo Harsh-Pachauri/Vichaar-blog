@@ -1,5 +1,5 @@
 const express = require("express")
-
+require('dotenv').config({ path: './config.env' });
 const router = express.Router()
 
 const authRoute = require("./auth")
