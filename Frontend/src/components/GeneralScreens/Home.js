@@ -21,7 +21,7 @@ const Home = () => {
     const getBlogs = async () => {
       setLoading(true);
       try {
-        const { data } = await axios.get(`/blog/getAllBlogs?search=${searchKey || ""}&page=${page}`);
+        const { data } = await axios.get(`https://vichaar-blog.onrender.com/blog/getAllBlogs?search=${searchKey || ""}&page=${page}`);
 
         if (searchKey) {
           navigate({

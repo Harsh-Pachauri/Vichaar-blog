@@ -19,7 +19,7 @@ const ReadListPage = () => {
     const getUserReadingList = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`/user/readList`, config);
+        const res = await axios.get(`https://vichaar-blog.onrender.com/user/readList`, config);
         setReadList(res.data.readList || []);
       } catch (error) {
         console.error("Failed to fetch reading list:", error);

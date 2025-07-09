@@ -14,7 +14,7 @@ const LoginScreen = () => {
 
     try {
       const { data } = await axios.post(
-        "/auth/login",
+        "https://vichaar-blog.onrender.com/auth/login",
         { email, password }
       );
       localStorage.setItem("authToken", data.token);

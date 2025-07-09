@@ -43,7 +43,7 @@ const EditProfile = () => {
     setSuccess('');
 
     const { data } = await axios.patch(
-      'http://localhost:5000/user/editProfile',
+      'https://vichaar-blog.onrender.com/user/editProfile',
       formData,
       config
     );

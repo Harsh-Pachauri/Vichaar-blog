@@ -28,7 +28,7 @@ const DetailBlog = () => {
       setLoading(true)
       var activeUser = {}
       try {
-        const { data } = await axios.get("/auth/private", {
+        const { data } = await axios.get("https://vichaar-blog.onrender.com/auth/private", {
           headers: {
             "Content-Type": "application/json",
             authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -44,7 +44,7 @@ const DetailBlog = () => {
       }
 
       try {
-        const { data } = await axios.post(`/blog/${slug}`, { activeUser })
+        const { data } = await axios.post(`https://vichaar-blog.onrender.com/blog/${slug}`, { activeUser })
         setBlog(data.data)
         setLikeStatus(data.likeStatus)
         setLikeCount(data.data.likeCount)
@@ -84,7 +84,7 @@ const DetailBlog = () => {
     }, 1500)
 
     try {
-      const { data } = await axios.post(`/blog/${slug}/like`, { activeUser }, {
+      const { data } = await axios.post(`https://vichaar-blog.onrender.com/blog/${slug}/like`, { activeUser }, {
         headers: {
           "Content-Type": "application/json",
           authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -109,7 +109,7 @@ const DetailBlog = () => {
 
       try {
 
-        await axios.delete(`/blog/${slug}/delete`, {
+        await axios.delete(`https://vichaar-blog.onrender.com/blog/${slug}/delete`, {
           headers: {
             "Content-Type": "application/json",
             authorization: `Bearer ${localStorage.getItem("authToken")}`,
@@ -139,7 +139,7 @@ const DetailBlog = () => {
 
     try {
 
-      const { data } = await axios.post(`/user/${slug}/addBlogToReadList`, { activeUser }, {
+      const { data } = await axios.post(`https://vichaar-blog.onrender.com/user/${slug}/addBlogToReadList`, { activeUser }, {
         headers: {
           "Content-Type": "application/json",
           authorization: `Bearer ${localStorage.getItem("authToken")}`,
