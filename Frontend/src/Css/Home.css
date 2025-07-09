@@ -4,7 +4,7 @@
     top: 250px;
     right: -205px;
     z-index: -5;
-    width: 450px;
+    width: 250px;
 }
 
 .bg-planet2-svg {
@@ -12,7 +12,7 @@
     bottom: -125px;
     left: -180px;
     z-index: -5;
-    width: 450px;
+    width: 250px;
     opacity: 0.8;
 }
 
@@ -21,7 +21,7 @@
     top: -65px;
     left: -170px;
     z-index: -5;
-    width: 450px;
+    width: 150px;
     opacity: 0.8;
 }
 
