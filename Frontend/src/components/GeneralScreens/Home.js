@@ -70,9 +70,9 @@ const Home = () => {
             ) : (
               <NoBlogs />
             )}
-            <img className="bg-planet-svg" src="pen.svg" alt="planet" />
-            <img className="bg-planet2-svg" src="bulb2.svg" alt="planet" />
-            <img className="bg-planet3-svg" src="bulb2.svg" alt="planet" />
+            <img className="bg-vichaarsvg-svg" src="pen.svg" alt="vichaarsvg" />
+            <img className="bg-vichaarsvg2-svg" src="bulb2.svg" alt="vichaarsvg" />
+            <img className="bg-vichaarsvg3-svg" src="bulb2.svg" alt="vichaarsvg" />
           </div>
 
           <Pagination page={page} pages={pages} changePage={setPage} />

@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Hammersmith+One&display=swap&family=Hammersmith+One&family=Londrina+Solid:wght@900&display=swap');
-.bg-planet-svg {
+.bg-vichaarsvg-svg {
     position: absolute;
     top: 250px;
     right: -205px;
@@ -7,7 +7,7 @@
     width: 250px;
 }
 
-.bg-planet2-svg {
+.bg-vichaarsvg2-svg {
     position: absolute;
     bottom: -125px;
     left: -180px;
@@ -16,7 +16,7 @@
     opacity: 0.8;
 }
 
-.bg-planet3-svg {
+.bg-vichaarsvg3-svg {
     position: absolute;
     top: -65px;
     left: -170px;
@@ -55,9 +55,9 @@
     .blog-card {
         width: 45%;
     }
-    .bg-planet3-svg,
-    .bg-planet-svg,
-    .bg-planet2-svg {
+    .bg-vichaarsvg3-svg,
+    .bg-vichaarsvg-svg,
+    .bg-vichaarsvg2-svg {
         display: none;
     }
 }
